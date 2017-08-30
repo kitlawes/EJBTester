@@ -1,6 +1,7 @@
 package com.tutorialspoint.test;
    
-import com.tutorialspoint.stateful.LibraryStatefulSessionBeanRemote;
+import com.tutorialspoint.entity.Book;
+import com.tutorialspoint.stateless.LibraryPersistentBeanRemote;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,9 +10,9 @@ import java.util.List;
 import java.util.Properties;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
- 
+
 public class EJBTester {
- 
+
    BufferedReader brConsoleReader = null; 
    Properties props;
    InitialContext ctx;
@@ -32,10 +33,10 @@ public class EJBTester {
    }
    
    public static void main(String[] args) {
- 
+
       EJBTester ejbTester = new EJBTester();
- 
-      ejbTester.testStatelessEjb();
+
+      ejbTester.testEntityEjb();
    }
    
    private void showGUI(){
@@ -45,14 +46,14 @@ public class EJBTester {
       System.out.print("Options \n1. Add Book\n2. Exit \nEnter Choice: ");
    }
    
-   private void testStatelessEjb(){
- 
+   private void testEntityEjb(){
+
       try {
          int choice = 1; 
- 
-         LibraryStatefulSessionBeanRemote libraryBean =
-         (LibraryStatefulSessionBeanRemote)ctx.lookup("LibraryStatefulSessionBean/remote");
- 
+
+         LibraryPersistentBeanRemote libraryBean =
+         (LibraryPersistentBeanRemote)ctx.lookup("LibraryPersistentBean/remote");
+
          while (choice != 2) {
             String bookName;
             showGUI();
@@ -61,31 +62,22 @@ public class EJBTester {
             if (choice == 1) {
                System.out.print("Enter book name: ");
                bookName = brConsoleReader.readLine();
-               String book = bookName;
+               Book book = new Book();
+               book.setName(bookName);
                libraryBean.addBook(book);          
             } else if (choice == 2) {
                break;
             }
          }
- 
-         List<String> booksList = libraryBean.getBooks();
- 
+
+         List<Book> booksList = libraryBean.getBooks();
+
          System.out.println("Book(s) entered so far: " + booksList.size());
          int i = 0;
-         for (String book:booksList) {
-            System.out.println((i+1)+". " + book);
+         for (Book book:booksList) {
+            System.out.println((i+1)+". " + book.getName());
             i++;
-         }       
-         LibraryStatefulSessionBeanRemote libraryBean1 = 
-            (LibraryStatefulSessionBeanRemote)ctx.lookup("LibraryStatefulSessionBean/remote");
-         List<String> booksList1 = libraryBean1.getBooks();
-         System.out.println(
-            "***Using second lookup to get library stateful object***");
-         System.out.println(
-            "Book(s) entered so far: " + booksList1.size());
-         for (i = 0; i < booksList1.size(); ++i) {
-            System.out.println((i+1)+". " + booksList1.get(i));
-         }		 
+         }           
       } catch (Exception e) {
          System.out.println(e.getMessage());
          e.printStackTrace();
